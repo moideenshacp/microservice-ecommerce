@@ -1,11 +1,10 @@
 const mongoose = require('mongoose')
-const product = require('../product-service/product')
 const Schema = mongoose.Schema
 
 const orderSchema = new Schema({
   products: [
     {
-      product_id: { type: mongoose.Schema.Types.ObjectId, ref: "product" },
+      product_id: String,
     },
   ],
   user: String,

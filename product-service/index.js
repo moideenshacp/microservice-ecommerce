@@ -4,11 +4,11 @@ const mongoose = require('mongoose')
 const jwt  = require('jsonwebtoken')
 const amqp = require('amqplib')
 const Product = require('./product')
-const isAuthenticated = require('../isAuthenticated.js')
+const isAuthenticated = require('./isAuthenticated.js')
 var channel,connection,order
 async function connectDB() {
     try {
-        await mongoose.connect("mongodb://localhost/product-service");
+        await mongoose.connect("mongodb://mongodb-service:27017/product-service");
         console.log("Product-service db connected");
     } catch (error) {
         console.error(error);
@@ -17,13 +17,21 @@ async function connectDB() {
 connectDB();
 app.use(express.json())
 
-async function connect(){
-    const amqpServer = "amqp://localhost:5672"
-    connection =await amqp.connect(amqpServer)
-    channel = await connection.createChannel()
-    await channel.assertQueue("PRODUCT")
+async function connect() {
+    try {
+        const amqpServer = "amqp://rabbitmq-service:5672";
+        const connection = await amqp.connect(amqpServer);
+        channel = await connection.createChannel();
+        await channel.assertQueue("PRODUCT");
+        await channel.assertQueue("ORDER");  // Ensure ORDER queue is also declared
+        console.log("Connected to RabbitMQ and queues are set up.");
+    } catch (error) {
+        console.error("RabbitMQ connection error:", error);
+    }
 }
-connect()
+
+// Connect to RabbitMQ on server start
+connect();
 //create product
 app.post('/product/create',isAuthenticated,async(req,res)=>{
     const {name,description,price} = req.body
@@ -38,32 +46,39 @@ app.post('/product/create',isAuthenticated,async(req,res)=>{
 
 //buy a product
 
-app.post('/product/buy',isAuthenticated,async(req,res)=>{
-    const {ids} = req.body
-    const products = await Product.find({_id:{$in:ids}})
+app.post('/product/buy', isAuthenticated, async (req, res) => {
+    const { ids } = req.body;
+    const products = await Product.find({ _id: { $in: ids } });
 
-    channel.sendToQueue(
-        "ORDER",
-        Buffer.from(
-            JSON.stringify({
-                products,
-                userEmail:req.user.email
-            })
-        )
-    )
+    console.log('Product:', products);
+    console.log("Email:", req.user.email);
 
-    channel.consume("PRODUCT",data=>{
-        console.log('consuming product queue');
-        
-        order = JSON.parse(data.content)
-        
-        console.log(order,"order cheytha products");
-        channel.ack(data)
-        return res.json(order)
-    })
-})
+    if (!channel) {
+        console.error("Channel is not initialized.");
+        return res.status(500).json({ error: "RabbitMQ channel is not available" });
+    }
+
+    try {
+        channel.sendToQueue(
+            "ORDER",
+            Buffer.from(
+                JSON.stringify({
+                    products,
+                    userEmail: req.user.email
+                })
+            )
+        );
+        console.log("Message sent to ORDER queue");
+
+        return res.json({ message: "Order request sent", products });
+    } catch (error) {
+        console.error("Error sending message to ORDER queue:", error);
+        return res.status(500).json({ error: "Failed to send order request" });
+    }
+});
 
 app.listen(8080,()=>{
+    console.log('h2');
     console.log("product service started at 8080");
     
 })

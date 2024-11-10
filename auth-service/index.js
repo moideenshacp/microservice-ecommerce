@@ -5,7 +5,7 @@ const User = require('./user')
 const jwt  = require('jsonwebtoken')
 async function connectDB() {
     try {
-        await mongoose.connect("mongodb://localhost/auth-service");
+        await mongoose.connect("mongodb://mongodb-service/auth-service");
         console.log("Auth-service db connected");
     } catch (error) {
         console.error(error);
