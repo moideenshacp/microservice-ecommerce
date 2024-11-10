@@ -59,6 +59,8 @@ app.post('/auth/login',async(req,res)=>{
 })
 
 app.listen(7070,()=>{
+    console.log('auth');
+    
     console.log("auth service started at 7070");
     
 })
