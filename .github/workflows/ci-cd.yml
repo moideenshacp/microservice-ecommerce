@@ -48,10 +48,23 @@ jobs:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBECONFIG_DATA }}
 
+       # Deploy MongoDB service
+      - name: Deploy MongoDB to Kubernetes
+        run: |
+          kubectl apply -f mongodb-depl.yaml
+          kubectl rollout restart deployment mongodb
+
+      # Deploy RabbitMQ service
+      - name: Deploy RabbitMQ to Kubernetes
+        run: |
+          kubectl apply -f rabbitmq-deployment.yaml
+          kubectl rollout restart deployment rabbitmq
+
+
       - name: Deploy product-service to Kubernetes
         run: |
           cd product-service
-          kubectl apply -f product-srv-depl.yaml
+          kubectl apply -f product-srv-dep.yaml
           kubectl rollout restart deployment product-service
 
       - name: Deploy order-service to Kubernetes
