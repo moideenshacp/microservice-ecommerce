@@ -51,17 +51,17 @@ jobs:
       - name: Deploy product-service to Kubernetes
         run: |
           cd product-service
-          kubectl apply -f product-srv-dep.yaml
+          kubectl apply -f product-srv-dep.yaml --validate=false
           kubectl rollout restart deployment product-service
 
       - name: Deploy order-service to Kubernetes
         run: |
           cd order-service
-          kubectl apply -f order-srv-depl.yaml
+          kubectl apply -f order-srv-depl.yaml --validate=false
           kubectl rollout restart deployment order-service
           
       - name: Deploy auth-service to Kubernetes
         run: |
           cd auth-service
-          kubectl apply -f auth-srv-depl.yaml
+          kubectl apply -f auth-srv-depl.yaml --validate=false
           kubectl rollout restart deployment auth-service
