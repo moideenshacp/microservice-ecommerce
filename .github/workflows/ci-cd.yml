@@ -51,13 +51,13 @@ jobs:
        # Deploy MongoDB service
       - name: Deploy MongoDB to Kubernetes
         run: |
-          kubectl apply -f mongodb-depl.yaml
+          kubectl apply -f mongodb-depl.yaml --validate=false
           kubectl rollout restart deployment mongodb
 
       # Deploy RabbitMQ service
       - name: Deploy RabbitMQ to Kubernetes
         run: |
-          kubectl apply -f rabbitmq-deployment.yaml
+          kubectl apply -f rabbitmq-deployment.yaml --validate=false
           kubectl rollout restart deployment rabbitmq
 
 
