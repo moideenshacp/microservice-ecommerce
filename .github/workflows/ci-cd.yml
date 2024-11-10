@@ -25,50 +25,40 @@ jobs:
       # Step 1: Build Docker Images for Each Service
       - name: Build auth-service Docker image
         run: |
+          cd auth-service
           docker build -t moideenshacp/e-auth .
-          docker push moideenshacp/e-auth 
+          docker push moideenshacp/e-auth
 
       - name: Build product-service Docker image
         run: |
+          cd product-service
           docker build -t moideenshacp/e-product-service .
-          docker push moideenshacp/e-product-service 
+          docker push moideenshacp/e-product-service
 
       - name: Build order-service Docker image
         run: |
+          cd order-service
           docker build -t moideenshacp/e-order-service .
           docker push moideenshacp/e-order-service
 
-      # Step 2: Set up Kubernetes Cluster (including MongoDB and RabbitMQ)
+      # Step 2: Deploy to Kubernetes
       - name: Set up kubectl
         uses: azure/k8s-set-context@v2
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBECONFIG_DATA }}
 
-      # Deploy MongoDB service
-      - name: Deploy MongoDB to Kubernetes
-        run: |
-          kubectl apply -f mongodb-depl.yaml
-          kubectl rollout restart deployment mongodb
-
-      # Deploy RabbitMQ service
-      - name: Deploy RabbitMQ to Kubernetes
-        run: |
-          kubectl apply -f rabbitmq-deployment.yaml
-          kubectl rollout restart deployment rabbitmq
-
-      # Step 3: Deploy application services to Kubernetes
       - name: Deploy product-service to Kubernetes
         run: |
-          kubectl apply -f product-service/pproduct-srv-dep.yaml
-          kubectl rollout restart deployment/product-service
+          kubectl apply -f product-service/product-srv-depl.yaml
+          kubectl rollout restart deployment product-service
 
       - name: Deploy order-service to Kubernetes
         run: |
           kubectl apply -f order-service/order-srv-depl.yaml
-          kubectl rollout restart deployment/order-service
+          kubectl rollout restart deployment order-service
           
       - name: Deploy auth-service to Kubernetes
         run: |
           kubectl apply -f auth-service/auth-srv-depl.yaml
-          kubectl rollout restart deployment/auth-srv-depl.yaml
+          kubectl rollout restart deployment auth-service
