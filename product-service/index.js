@@ -23,14 +23,13 @@ async function connect() {
         const connection = await amqp.connect(amqpServer);
         channel = await connection.createChannel();
         await channel.assertQueue("PRODUCT");
-        await channel.assertQueue("ORDER");  // Ensure ORDER queue is also declared
+        await channel.assertQueue("ORDER");  
         console.log("Connected to RabbitMQ and queues are set up.");
     } catch (error) {
         console.error("RabbitMQ connection error:", error);
     }
 }
 
-// Connect to RabbitMQ on server start
 connect();
 //create product
 app.post('/product/create',isAuthenticated,async(req,res)=>{

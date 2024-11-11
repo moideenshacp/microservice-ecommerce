@@ -67,7 +67,6 @@ connect().then(() => {
             // Send acknowledgment
             channel.ack(data);
 
-            // Send order details back to PRODUCT queue
             channel.sendToQueue("PRODUCT", Buffer.from(JSON.stringify({ newOrder })));
         } catch (error) {
             console.error("Error processing message from ORDER queue:", error);
